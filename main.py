@@ -4,48 +4,39 @@ import os
 import sys
 
 def create_watermark(watermark_size, watermark_text, font_size, h_spacing, v_spacing, color, opacity, font_path):
-    # Create a watermark canvas
+    print(f"Creating watermark canvas of size: {watermark_size}")
     watermark = Image.new('RGBA', watermark_size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(watermark)
 
-    # Choose a font for the watermark
-    if font_path and os.path.exists(font_path):
-        font = ImageFont.truetype(font_path, font_size)
-    else:
-        font = ImageFont.load_default()
-
-    # Set text color and opacity
+    font = ImageFont.truetype(font_path, font_size) if font_path and os.path.exists(font_path) else ImageFont.load_default()
     text_color = (color[0], color[1], color[2], int(255 * opacity))
 
-    # Tile the watermark text across the watermark canvas
+    print(f"Adding watermark text '{watermark_text}' with font size {font_size}, spacing {h_spacing}x{v_spacing}, color {color}, opacity {opacity}")
     for x in range(0, watermark_size[0], h_spacing):
         for y in range(0, watermark_size[1], v_spacing):
             draw.text((x, y), watermark_text, fill=text_color, font=font)
 
-    # Rotate the watermark
+    print("Rotating watermark")
     watermark = watermark.rotate(45, expand=1)
 
     return watermark
 
 def apply_watermark_to_image(image_path, watermark):
-    # Load the original image
+    print(f"Loading image: {image_path}")
     original = Image.open(image_path)
 
-    # Calculate the position to overlay the watermark on the original image
     wx, wy = (watermark.size[0] - original.size[0]) // 2, (watermark.size[1] - original.size[1]) // 2
-
-    # Create a new image by combining original and watermark
     watermarked = Image.new('RGBA', original.size)
     watermarked.paste(original, (0, 0))
     watermarked.paste(watermark, (-wx, -wy), mask=watermark)
 
-    # Save the result in the same directory as the original image
     output_path = os.path.join(os.path.dirname(image_path), f"watermarked_{os.path.basename(image_path)}")
     watermarked.convert('RGB').save(output_path, 'JPEG')
 
-    print(f"Watermarked image created: {output_path}")
+    print(f"Watermarked image saved: {output_path}")
 
 def find_largest_image_size(directory):
+    print(f"Scanning directory {directory} for largest image size")
     max_width, max_height = 0, 0
     for filename in os.listdir(directory):
         if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
@@ -53,16 +44,14 @@ def find_largest_image_size(directory):
             with Image.open(image_path) as img:
                 width, height = img.size
                 max_width, max_height = max(max_width, width), max(max_height, height)
-    return max_width * 2, max_height * 2  # Quadruple the size for rotation and complete coverage
+    print(f"Largest image size found: {max_width}x{max_height}")
+    return max_width * 2, max_height * 2
 
 def apply_watermark_to_images(directory, watermark_text, font_size, h_spacing, v_spacing, color, opacity, font_path):
-    # Find the size of the largest image
     watermark_size = find_largest_image_size(directory)
-
-    # Create the watermark
     watermark = create_watermark(watermark_size, watermark_text, font_size, h_spacing, v_spacing, color, opacity, font_path)
 
-    # Iterate over files in the specified directory and apply watermark
+    print(f"Applying watermark to images in {directory}")
     for filename in os.listdir(directory):
         if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')) and not filename.startswith("watermarked_"):
             image_path = os.path.join(directory, filename)
