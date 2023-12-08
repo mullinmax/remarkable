@@ -38,7 +38,9 @@ def apply_watermark_to_image(image_path, watermark):
 def find_largest_image_size(directory):
     print(f"Scanning directory {directory} for largest image size")
     max_width, max_height = 0, 0
-    for filename in os.listdir(directory):
+    all_files = os.listdir(directory)
+    print(f"found {len(all_files)} files")
+    for filename in all_files:
         if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
             image_path = os.path.join(directory, filename)
             with Image.open(image_path) as img:
