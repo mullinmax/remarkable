@@ -38,14 +38,13 @@ def apply_watermark_to_image(image_path, watermark):
 def find_largest_image_size(directory):
     print(f"Scanning directory {directory} for largest image size")
     max_width, max_height = 0, 0
-    all_files = os.listdir(directory)
-    print(f"found {len(all_files)} files")
-    for filename in all_files:
-        if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
-            image_path = os.path.join(directory, filename)
-            with Image.open(image_path) as img:
-                width, height = img.size
-                max_width, max_height = max(max_width, width), max(max_height, height)
+    for root, dirs, files in os.walk(directory):
+        for filename in files:
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+                image_path = os.path.join(root, filename)
+                with Image.open(image_path) as img:
+                    width, height = img.size
+                    max_width, max_height = max(max_width, width), max(max_height, height)
     print(f"Largest image size found: {max_width}x{max_height}")
     return max_width * 2, max_height * 2
 
@@ -54,10 +53,11 @@ def apply_watermark_to_images(directory, watermark_text, font_size, h_spacing, v
     watermark = create_watermark(watermark_size, watermark_text, font_size, h_spacing, v_spacing, color, opacity, font_path)
 
     print(f"Applying watermark to images in {directory}")
-    for filename in os.listdir(directory):
-        if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')) and not filename.startswith("watermarked_"):
-            image_path = os.path.join(directory, filename)
-            apply_watermark_to_image(image_path, watermark)
+    for root, dirs, files in os.walk(directory):
+        for filename in files:
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')) and not filename.startswith("watermarked_"):
+                image_path = os.path.join(root, filename)
+                apply_watermark_to_image(image_path, watermark)
 
 def main():
     parser = argparse.ArgumentParser(description='Apply a watermark to images in a directory.')
