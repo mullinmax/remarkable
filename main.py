@@ -26,12 +26,13 @@ def apply_watermark_to_image(image_path, watermark):
     original = Image.open(image_path)
 
     wx, wy = (watermark.size[0] - original.size[0]) // 2, (watermark.size[1] - original.size[1]) // 2
-    watermarked = Image.new('RGBA', original.size)
-    watermarked.paste(original, (0, 0))
-    watermarked.paste(watermark, (-wx, -wy), mask=watermark)
+    watermarked = Image.new('RGBA', original.size, (255, 255, 255, 0))
+    watermarked.paste(original, (0, 0), original)
+    watermarked.paste(watermark, (-wx, -wy), watermark)
 
+    output_format = 'PNG' if original.format == 'PNG' else 'JPEG'
     output_path = os.path.join(os.path.dirname(image_path), f"watermarked_{os.path.basename(image_path)}")
-    watermarked.convert('RGB').save(output_path, 'JPEG')
+    watermarked.save(output_path, output_format)
 
     print(f"Watermarked image saved: {output_path}")
 
