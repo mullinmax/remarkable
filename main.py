@@ -34,11 +34,13 @@ def apply_watermark_to_image(image_path, watermark):
     watermarked.paste(original, (0, 0), original)
     watermarked.paste(watermark, (-wx, -wy), watermark)
 
-    output_format = 'PNG' if original.format == 'PNG' else 'JPEG'
+    # Determine output format based on the original image format and if it supports transparency
+    output_format = 'PNG' if original.format in ['PNG', 'GIF'] or original.mode == 'RGBA' else 'JPEG'
     output_path = os.path.join(os.path.dirname(image_path), f"watermarked_{os.path.basename(image_path)}")
     watermarked.save(output_path, output_format)
 
     print(f"Watermarked image saved: {output_path}")
+
 
 
 def find_largest_image_size(directory):
