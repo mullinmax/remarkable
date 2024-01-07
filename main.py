@@ -25,6 +25,10 @@ def apply_watermark_to_image(image_path, watermark):
     print(f"Loading image: {image_path}")
     original = Image.open(image_path)
 
+    # Convert original image to 'RGBA' if it's not already in that mode
+    if original.mode != 'RGBA':
+        original = original.convert('RGBA')
+
     wx, wy = (watermark.size[0] - original.size[0]) // 2, (watermark.size[1] - original.size[1]) // 2
     watermarked = Image.new('RGBA', original.size, (255, 255, 255, 0))
     watermarked.paste(original, (0, 0), original)
@@ -35,6 +39,7 @@ def apply_watermark_to_image(image_path, watermark):
     watermarked.save(output_path, output_format)
 
     print(f"Watermarked image saved: {output_path}")
+
 
 def find_largest_image_size(directory):
     print(f"Scanning directory {directory} for largest image size")
