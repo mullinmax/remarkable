@@ -48,13 +48,17 @@ def find_largest_image_size(directory):
     max_width, max_height = 0, 0
     for root, dirs, files in os.walk(directory):
         for filename in files:
-            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')) and not filename.startswith("watermarked_"):
                 image_path = os.path.join(root, filename)
-                with Image.open(image_path) as img:
-                    width, height = img.size
-                    max_width, max_height = max(max_width, width), max(max_height, height)
+                try:
+                    with Image.open(image_path) as img:
+                        width, height = img.size
+                        max_width, max_height = max(max_width, width), max(max_height, height)
+                except IOError:
+                    print(f"Skipping non-image file: {image_path}")
     print(f"Largest image size found: {max_width}x{max_height}")
     return max_width * 2, max_height * 2
+
 
 def apply_watermark_to_images(directory, watermark_text, font_size, h_spacing, v_spacing, color, opacity, font_path):
     watermark_size = find_largest_image_size(directory)
